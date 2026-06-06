@@ -1,0 +1,390 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Rinf}{R_\infty}
+\newcommand{\flag}[1]{{\color{red}\textsf{[FLAG(operator): #1]}}}
+
+\title{When does the dominant coefficient of a polynomial\\
+continued fraction vanish?\\[3pt]
+\large A monotone positivity criterion (machine-checked core),\\
+an unconditional bound for a positive family,\\
+and an explicit vanishing witness}
+\author{Papanokechi\\
+\small ORCID: \href{https://orcid.org/0009-0000-6192-8273}{0009-0000-6192-8273}}
+\date{June 2026 \quad(\texttt{pcf-continuant} draft v0.1.0)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $b$ be a real polynomial of degree $d$ with leading coefficient $\beta_d>0$,
+and let $q_n$ be the continuant denominators of the polynomial continued fraction
+with partial denominators $b(n)$ and unit partial numerators:
+$q_0=1$, $q_1=b(1)$, $q_n=b(n)q_{n-1}+q_{n-2}$. Writing
+$P_n=\prod_{k=1}^n b(k)$ and $Q_n=q_n/P_n$, the scaled limit
+$C:=\Rinf:=\lim_n Q_n$ is the dominant (connection) coefficient of the seed
+$(1,b(1))$; one has $C\neq0$ iff $q$ is not a minimal solution. We give a clean
+account of when $C\neq0$. First, an elementary \emph{ratio criterion}: once $b>0$
+on a tail and two consecutive $q$ are positive, $\rho_n=q_n/q_{n-1}>b(n)\to+\infty$,
+so $q$ is dominant and $C\neq0$. Second, a \emph{positivity-persistence lemma}: if
+$u_n=1/(b(n-1)b(n))>0$ from some index on and the scaled sequence is then positive,
+$Q_n$ is nondecreasing and $C\ge Q_{N_0}>0$; the monotone--bounded core is verified
+in Lean~4 (Mathlib) with a clean axiom cone (no \texttt{sorryAx}). As a corollary,
+$b(n)>0$ for all $n\ge1$ forces $C\ge1$; in particular the family
+$b(n)=An^2+Bn+C_0$ with integers $A,B,C_0\ge1$ has $C\ge1$ unconditionally, which
+recovers the strict positivity $\delta=\log\Rinf>0$ used in the companion
+quadratic growth-law deposit. Third---and this is the point of the
+falsification-first method---the \emph{universal} statement ``$C\neq0$ for every
+$\beta_d>0$'' is \textbf{false}: we exhibit a real quadratic
+$b(n)=n^2-6.2803109563277\ldots\,n+8.4205764270426\ldots$ for which $C=0$ to more
+than forty digits at $50$-digit working precision, with the dominant scale
+$\prod|b|$ exceeding $10^{43000}$ at the same index---a genuine minimal seed. The
+vanishing is produced by the sign-varying transient ($b(2),b(3)<0$), not by the
+tail, and $b(1)>0$ does \emph{not} imply $C\neq0$. We are careful to claim only
+$\ge1$ such zero: the map $(\alpha,\beta)\mapsto\Rinf$ has genuine poles wherever
+$b$ has an integer root, so a sign-change count is not a zero count. Finally we
+flag the one genuinely open point: $C=0$ shows the singular Frobenius coefficient
+vanishes, but the stronger statement that the associated generating function is
+\emph{entire} requires a separate unique-nearest-singularity analysis, left as
+future work.
+\end{abstract}
+
+\paragraph{Epistemic status (SIARC four-class).}
+Each statement below carries one of:
+\textbf{PROVEN} (machine-checked; clean Lean axiom cone
+$\subseteq\{\texttt{propext},\texttt{Classical.choice},\texttt{Quot.sound}\}$,
+no \texttt{sorryAx}),
+\textbf{VERIFIED} (high-precision numerics, stated digits above the floor),
+\textbf{STRUCTURAL} (complete elementary hand proof, not yet formalized),
+\textbf{CONJECTURED}, or \textbf{FALSE} (disproved by explicit witness).
+Citations to the literature that were not source-verified for this draft are
+marked \flag{confirm locator}; they are used only for context and no result below
+depends on them.
+
+\section{Setup and the meaning of $C$}\label{sec:setup}
+
+Fix a real polynomial $b$ of degree $d$ with leading coefficient $\beta_d>0$, and
+consider the second-order recurrence of continuant denominators
+\begin{equation}\label{eq:rec}
+  q_n=b(n)\,q_{n-1}+q_{n-2},\qquad n\ge2,\qquad q_0=1,\ q_1=b(1).
+\end{equation}
+The transfer matrix $M_n=\bigl[\begin{smallmatrix}b(n)&1\\1&0\end{smallmatrix}\bigr]$
+has $\det M_n=-1$, so solutions of \eqref{eq:rec} form a $2$-dimensional space and
+the Casoratian (discrete Wronskian) of any two solutions $y,z$ satisfies
+$W_n=-W_{n-1}$, i.e.\ $W_n=(-1)^nW_0$. For the numerator/denominator pair this is
+the identity
+\begin{equation}\label{eq:caso}
+  p_{n+1}q_n-p_nq_{n+1}=(-1)^n,
+\end{equation}
+which is \textbf{PROVEN} in Lean (\S\ref{sec:lean}, \texttt{pq\_casoratian}).
+
+Assume $b(k)\neq0$ for all $k\ge1$ (otherwise the product scaling is undefined;
+$b(1)=0$ is excluded outright). Put $P_n=\prod_{k=1}^n b(k)$ and the scaled
+sequence $Q_n=q_n/P_n$. Dividing \eqref{eq:rec} by $P_n$ gives
+\begin{equation}\label{eq:scaled}
+  Q_n=Q_{n-1}+u_n\,Q_{n-2},\qquad u_n=\frac{1}{b(n-1)\,b(n)},\qquad Q_0=Q_1=1.
+\end{equation}
+
+A solution $y$ of \eqref{eq:rec} is \emph{dominant} if $y_n\asymp P_n$ (so
+$y_n/P_n$ tends to a nonzero constant), and the one-dimensional ray of
+\emph{minimal} solutions $m$ satisfies $m_n/y_n\to0$, hence $m_n/P_n\to0$. Writing
+$q=C\,y+D\,m$ with $y$ normalized so that $y_n/P_n\to1$,
+\begin{equation}\label{eq:Cdef}
+  C\;=\;\Rinf\;:=\;\lim_n Q_n\;=\;\lim_n\frac{q_n}{\prod_{k=1}^n b(k)},
+  \qquad\text{and}\qquad
+  C\neq0\ \Longleftrightarrow\ q\ \text{is not minimal}.
+\end{equation}
+This $C$ is the object to decide. Equivalently, ``$q$ is exactly the minimal
+solution'' (the degenerate seed) is exactly $C=0$.
+
+\begin{remark}
+The abstract dominant/minimal dichotomy and the uniqueness of the minimal ray are
+the content of Perron's theorem for $b(n)\to\infty$ and of Pincherle's theorem.
+\flag{confirm Perron / Pincherle statement and locator} We invoke them only as
+context; \S\ref{sec:ratio}--\ref{sec:lemmaP} below are self-contained and
+elementary, and \S\ref{sec:sharp} is a numerical existence statement.
+\end{remark}
+
+\section{The ratio criterion (dominant $\Rightarrow C\neq0$)}\label{sec:ratio}
+
+Let $\rho_n=q_n/q_{n-1}$. From \eqref{eq:rec}, wherever $\rho_{n-1}\neq0$,
+\begin{equation}\label{eq:riccati}
+  \rho_n=b(n)+\frac{1}{\rho_{n-1}}.
+\end{equation}
+When $b(n)\to+\infty$ this Riccati form has two asymptotic branches: a dominant
+branch $\rho_n\sim b(n)\to+\infty$, and a minimal branch
+$\rho_n\sim-1/b(n+1)\to0^-$.
+
+\begin{proposition}[Ratio criterion; \textbf{STRUCTURAL}, elementary]\label{prop:ratio}
+Suppose there is $N_0$ with $b(n)>0$ for all $n\ge N_0$ and $q_{N_0-1},q_{N_0}>0$.
+Then $\rho_n>b(n)$ for every $n>N_0$, hence $\rho_n\to+\infty$, $q$ is on the
+dominant branch, and $C\neq0$.
+\end{proposition}
+
+\begin{proof}
+$\rho_{N_0}=q_{N_0}/q_{N_0-1}>0$. If $\rho_{n-1}>0$ then by \eqref{eq:riccati}
+$\rho_n=b(n)+1/\rho_{n-1}>b(n)>0$, and the induction continues. Thus $\rho_n>b(n)$
+for all $n>N_0$, and $b(n)\to+\infty$ gives $\rho_n\to+\infty$. A solution with
+$q_n/q_{n-1}\to+\infty$ cannot be minimal (the minimal ratio tends to $0$), so $q$
+is dominant and $C\neq0$ by \eqref{eq:Cdef}.
+\end{proof}
+
+No external asymptotic theorem is used: the bound $\rho_n>b(n)$ is a one-line
+induction. (The determinant identity $\det M_n=-1$ only shows the propagation is a
+bijection; it does \emph{not} by itself preserve ``off the minimal ray,'' and is
+\emph{not} used here.) Numerically, the dominant seed has $q_N/q_{N-1}=b(N)$ to
+machine precision, while the backward-computed minimal solution has
+$\rho^{\min}_n\,b(n+1)\to-1$ (\texttt{review\_check\_Cnonzero.py}).
+
+\section{Positivity-persistence: a sufficient condition with a machine-checked core}
+\label{sec:lemmaP}
+
+We now give the sufficient condition in the scaled frame \eqref{eq:scaled}, where
+its heart is a monotone--bounded argument that we have formalized.
+
+\begin{lemma}[Positivity persistence; engine \textbf{PROVEN}]\label{lem:P}
+Suppose there is an index $N_0$ with
+\textup{(i)} $u_n>0$ for all $n>N_0$ \textup{(}guaranteed once $b(n)>0$ for all
+$n\ge N_0$\textup{)}, and \textup{(ii)} $Q_{N_0-1}\ge0$ and $Q_{N_0}>0$. Then $Q_n$
+is positive and nondecreasing for $n\ge N_0$, the limit $\Rinf=\lim_n Q_n$ exists,
+and
+\[
+  C=\Rinf\ \ge\ Q_{N_0}\ >\ 0 .
+\]
+In particular $q$ is dominant and $C\neq0$.
+\end{lemma}
+
+\begin{proof}
+For $n>N_0$, $Q_n=Q_{n-1}+u_nQ_{n-2}$. By induction from (ii): if $Q_{n-2}\ge0$ and
+$Q_{n-1}>0$ then $Q_n=Q_{n-1}+u_nQ_{n-2}\ge Q_{n-1}>0$, and $(Q_{n-1},Q_n)$ again
+satisfies the hypotheses. Hence $Q_n\ge Q_{n-1}$ for $n>N_0$, so the sequence is
+nondecreasing and bounded below by $Q_{N_0}>0$. It is bounded above because
+$\sum_n u_n<\infty$ (as $u_n\sim\beta_d^{-2}n^{-2d}$ with $2d\ge2$), giving
+$Q_n\le Q_{N_0}\prod_{k>N_0}(1+u_k)<\infty$; a monotone bounded sequence converges,
+so $\Rinf\ge Q_{N_0}>0$.
+\end{proof}
+
+\paragraph{What is machine-checked.}
+The monotone and bounded-below steps are, in the canonical normalization
+$r_0=r_1=1$, exactly the Lean lemmas \texttt{rseq\_ge\_one} and \texttt{rseq\_mono}
+for the sequence $r_{n+2}=r_{n+1}+u_{n+2}r_n$ over any $u\ge0$
+(\S\ref{sec:lean}). These are parametric in the sequence $u$ (hence in $b$), not in
+any numeric instance; their axiom cones are clean. Two honest scope caveats:
+(a) \texttt{rseq} fixes the canonical start $r_0=r_1=1$, so Lean certifies exactly
+the $N_0=1$ instance; the shifted statement of Lemma~\ref{lem:P} for $N_0>1$ is an
+elementary variant we have not formalized (grade \textbf{STRUCTURAL});
+(b) the reduction ``$b>0\Rightarrow u_n\ge0$ and $Q$ obeys \eqref{eq:scaled}'' is a
+one-line hand step, not inside Lean.
+
+\begin{corollary}[All-positive case; \textbf{PROVEN} engine + elementary reduction]
+\label{cor:allpos}
+If $b(n)>0$ for all $n\ge1$, take $N_0=1$: then $Q_0=Q_1=1>0$ and $u_n>0$, so
+$C=\Rinf\ge1$. In particular, for the family $b(n)=An^2+Bn+C_0$ with integers
+$A,B,C_0\ge1$ \textup{(}so $b(n)\ge A+B+C_0\ge3>0$ for all $n\ge1$\textup{)},
+$C\ge1$ holds with no extra hypothesis.
+\end{corollary}
+
+This recovers, and explains structurally, the strict positivity
+$\delta=\log\Rinf>0$ that the companion quadratic growth-law deposit uses for the
+family $A,B,C_0\ge1$: there the constant $\delta$ is the continued-fraction
+correction beyond the elementary $\Gamma$-product, and Corollary~\ref{cor:allpos}
+is precisely why it is positive.
+
+\paragraph{Seed-index check (no $b(0)$ leak).}
+A $\forall$-over-the-family claim must rule out an off-by-one at the seed, since
+$u_n=1/(b(n-1)b(n))$ references $b(n-1)$. It does not leak: the scaled recurrence
+\eqref{eq:scaled} begins at $n=2$ with $u_2=1/(b(1)b(2))$, and $Q_0=Q_1=1$ are pure
+seeds independent of $b(0)$. The smallest index of $b$ used anywhere is $b(1)$;
+$b(0)=C_0$ never enters a denominator (mirrored in the Lean \texttt{rseq}, whose
+$r_{n+2}$ references $u_{n+2}$ from $n=0$, i.e.\ $u_2$ upward, never $u_0,u_1$).
+This was checked at $50$-digit precision for
+$(A,B,C_0)\in\{(1,1,1),(1,1,5),(3,1,1),(1,7,1),(2,5,9),(1,1,1000)\}$ including the
+boundary $A=B=C_0=1$: $b(0)$ untouched, the recurrence residual is $\sim10^{-51}$,
+$Q_n$ is nondecreasing and $\ge1$, and $C\in[1.00002,1.066]$
+(\texttt{check\_seed\_index.py}). \textbf{VERIFIED}.
+
+\section{Sharpness: the universal claim is false}\label{sec:sharp}
+
+The positivity hypothesis of Lemma~\ref{lem:P} cannot be dropped. We disprove the
+universal statement by an explicit witness, following the discipline of trying to
+\emph{break} the claim rather than confirm it.
+
+\begin{theorem}[Vanishing witness; \textbf{FALSE} for the universal claim,
+\textbf{VERIFIED}]\label{thm:witness}
+The statement ``$C\neq0$ for every degree-$d$ polynomial $b$ with $\beta_d>0$'' is
+false. For
+\[
+  b(n)=n^2-6.2803109563277\ldots\,n+8.4205764270426\ldots
+      =(n-\alpha^\ast)(n-\beta^\ast),\quad
+  \alpha^\ast\approx1.9401554781638748,\ \ \beta^\ast=\alpha^\ast+2.4,
+\]
+one has $C=\Rinf=0$.
+\end{theorem}
+
+\paragraph{Numerical evidence (above the floor).}
+At working precision $50$ decimal digits (\texttt{verify\_witness\_precision.py}):
+refining the root by bisection drives $\Rinf$ in lock-step with the bracket width,
+$\Rinf\propto(\alpha^\ast-\text{root})$ down to $\sim10^{-40}$---the signature of a
+genuine \emph{simple} zero, not a precision floor. At the refined $\alpha^\ast$,
+$\Rinf=3.756\cdot10^{-40}$ is stable across $N=800,1600,3200,6400$, while the
+dominant scale $\log_{10}\prod_{k\le N}|b(k)|$ grows $3934\to8846\to19634\to43140$;
+i.e.\ the seed is minimal by some $10^{44000}$ orders relative to the dominant
+solution. Transversality: $\alpha^\ast\pm0.05$ give $\Rinf=+0.355$ and $-4.32$,
+order-one values of opposite sign. The vanishing is caused by the sign-varying
+transient---$b(1)=+3.140$, $b(2)=-0.140$, $b(3)=-1.420$, then $b(n)>0$ for
+$n\ge4$---so $b(1)>0$ does \emph{not} imply $C\neq0$, and the cancellation lives in
+the seed/transient, exactly where Lemma~\ref{lem:P}'s positivity hypothesis is
+needed.
+
+\paragraph{Only $\ge1$ zero is claimed (poles, not a zero count).}
+A coarse scan of $(\alpha,\beta)\mapsto\Rinf$ shows many sign changes, but the map
+has genuine \emph{poles} wherever $b$ has an integer root (some $b(k)=0$, so
+$\Rinf=q_n/P_n\to\pm\infty$): for the gap-$2.4$ slice these occur at
+$\alpha\in\{1.6,2.0,2.6,3.0\}$ (\texttt{check\_bracket\_continuity.py}). A
+sign-change count is therefore \emph{not} a zero count, and we make no claim about
+the total number of zeros. The witness above is carried by a single bracket
+$[1.85,1.98]$ that is \emph{pole-free} (nearest integer collisions $1.6$ and $2.0$
+lie outside), on which $\Rinf$ is smooth and monotone, $+0.445\to+0.002\to-1.68$, a
+single clean crossing. The cancellation locus $\{b:C(b)=0\}$ is thus nonempty;
+since $C(b)$ is a transcendental connection constant (not a polynomial in the
+coefficients), its zero set is a real-analytic variety of codimension one, here
+exhibited explicitly at one point.
+
+\section{The open point: $C=0$ versus ``entire''}\label{sec:step0}
+
+Theorem~\ref{thm:witness} shows the dominant coefficient $C$ vanishes for the
+witness. If one passes to the generating function $G(z)=\sum_n g_n z^n$ of the
+normalized denominator coefficients, a natural reading is ``$C=0\Rightarrow G$ is
+entire.'' That implication is \emph{not} established here. It rests on a dichotomy
+\[
+  \mathrm{radius}(G)=R\ \Longleftrightarrow\ \text{the singular local mode at }z=R
+  \text{ is present}\ \Longleftrightarrow\ C\neq0,
+\]
+whose nontrivial half requires that the holomorphic Frobenius modes of the ODE
+annihilating $G$ have radius strictly greater than $R=d^d/\beta_d$ (for $d=2$,
+$R=4/A$, \textbf{VERIFIED} to ten digits in \texttt{review\_check\_Cnonzero.py}).
+That holds iff $R$ is the \emph{unique nearest} singular point of the annihilating
+ODE; if a second singular point sits at distance exactly $R$, a holomorphic mode
+could also have radius $R$ and the dichotomy breaks. Establishing the
+unique-nearest-singularity premise (enumerate the singular points; prove $R$ is the
+unique closest to the origin) is a separate, cleanly stated task, left as future
+work. Until it is closed, the honest reading of Theorem~\ref{thm:witness} is ``the
+singular Frobenius coefficient vanishes,'' not ``$G$ is entire.''
+
+\section{The Lean core}\label{sec:lean}
+
+The accompanying Lean~4 project (\texttt{pcf-continuant}, Mathlib pinned via
+\texttt{lake-manifest.json}) formalizes the finitary structural core. The Casoratian
+identities are over an arbitrary commutative ring; the monotone/bounded-below
+lemmas are over $\R$. Verbatim signatures:
+{\small
+\begin{verbatim}
+def IsSol (c s : N -> R) : Prop := forall n, s (n+2) = c (n+2) * s (n+1) + s n
+def casoratian (y z : N -> R) (n : N) : R := y (n+1) * z n - y n * z (n+1)
+theorem casoratian_step {c y z : N -> R} (hy : IsSol c y) (hz : IsSol c z) (n) :
+    casoratian y z (n+1) = - casoratian y z n
+theorem casoratian_eq   {c y z : N -> R} (hy : IsSol c y) (hz : IsSol c z) (n) :
+    casoratian y z n = (-1)^n * casoratian y z 0
+theorem pq_casoratian {b p q : N -> R}
+    (hp : IsSol b p) (hq : IsSol b q)
+    (hp0 : p 0 = 1) (hp1 : p 1 = b 1 + 1)
+    (hq0 : q 0 = 1) (hq1 : q 1 = b 1) (n) :
+    p (n+1) * q n - p n * q (n+1) = (-1)^n
+theorem rseq_ge_one (u : N -> R) (hu : forall n, 0 <= u n) :
+    forall n, 1 <= rseq u n /\ 1 <= rseq u (n+1)
+theorem rseq_mono   (u : N -> R) (hu : forall n, 0 <= u n) (n) :
+    rseq u n <= rseq u (n+1)
+\end{verbatim}
+}
+Running \texttt{lake env lean Check.lean} (\texttt{\#print axioms}) yields the
+following cones, all subsets of
+$\{\texttt{propext},\texttt{Classical.choice},\texttt{Quot.sound}\}$ with no
+\texttt{sorryAx}:
+{\small
+\begin{verbatim}
+'PcfContinuant.casoratian_step' depends on axioms: [propext]
+'PcfContinuant.casoratian_eq'   depends on axioms: [propext, Quot.sound]
+'PcfContinuant.pq_casoratian'   depends on axioms: [propext, Quot.sound]
+'PcfContinuant.rseq_ge_one'     depends on axioms: [propext, Classical.choice, Quot.sound]
+'PcfContinuant.rseq_mono'       depends on axioms: [propext, Classical.choice, Quot.sound]
+\end{verbatim}
+}
+Hence the engine of Lemma~\ref{lem:P} (Corollary~\ref{cor:allpos} at $N_0=1$) is
+\textbf{PROVEN} in the strict sense used here.
+
+\section{Summary of claims and grades}\label{sec:summary}
+
+\begin{center}
+\small
+\begin{tabular}{p{0.60\textwidth}p{0.28\textwidth}}
+\hline
+Statement & Grade \\
+\hline
+$C=\Rinf=\lim q_n/\prod b$; $C\neq0\Leftrightarrow q$ not minimal & derived (\S\ref{sec:setup}); Casoratian piece PROVEN \\
+Ratio criterion $\rho_n\to+\infty\Rightarrow C\neq0$ (positive tail) & STRUCTURAL, elementary \\
+Lemma~\ref{lem:P} monotone/bounded engine ($N_0=1$) & PROVEN (Lean, clean cone) \\
+Shifted Lemma~\ref{lem:P} for $N_0>1$ & STRUCTURAL \\
+$b(n)>0\ \forall n\Rightarrow C\ge1$; deposited family $A,B,C_0\ge1$ & engine PROVEN + elementary reduction \\
+No $b(0)$ seed-index leak for deposited family & VERIFIED (dps $50$) \\
+Universal ``$C\neq0$ for all $\beta_d>0$'' & \textbf{FALSE} (Thm~\ref{thm:witness}) \\
+$\ge1$ explicit zero ($C=0$ witness) & VERIFIED (dps $50$, $\sim10^{-40}$) \\
+Number of zeros / locus structure & open (poles $\neq$ zeros) \\
+$C=0\Rightarrow G$ entire & CONDITIONAL on \S\ref{sec:step0} (open) \\
+Perron / Pincherle / Frobenius radius bound & context only; \flag{unverified} \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{Reproducibility.}
+All numerics are \texttt{mpmath} at the stated precision:
+\texttt{review\_check\_Cnonzero.py} (ratio criterion, $R=d^d/\beta_d$),
+\texttt{falsify\_Czero.py} and \texttt{locate\_Czero.py} (the witness),
+\texttt{verify\_witness\_precision.py} (simple-zero/precision check),
+\texttt{check\_bracket\_continuity.py} (pole audit),
+\texttt{check\_seed\_index.py} (no $b(0)$ leak). The Lean core builds against the
+pinned Mathlib in \texttt{lake-manifest.json}; \texttt{Check.lean} reproduces the
+axiom cones above.
+
+\paragraph{Acknowledgement of method.}
+This note is the product of an adversarial review cycle in which each load-bearing
+claim was attacked numerically before being asserted. That process retracted an
+earlier overcount (``many zeros by the intermediate value theorem,'' invalid
+because of the poles), corrected the value of $R$, demoted a determinant argument
+that did not prove what it appeared to, and upgraded the deposited-family
+positivity to a machine-checked statement. The two remaining open items
+(\S\ref{sec:step0}; the literature locators) are stated as such rather than papered
+over.
+
+\paragraph{Code and data availability.}
+The numerical witnesses
+\texttt{review\_check\_Cnonzero.py}, \texttt{review\_check\_transient.py},
+\texttt{falsify\_Czero.py}, \texttt{locate\_Czero.py},
+\texttt{verify\_witness\_precision.py}, \texttt{check\_bracket\_continuity.py}, and
+\texttt{check\_seed\_index.py}, together with the Lean core
+\texttt{lean/pcf\_continuant/} (\texttt{Check.lean} reproduces the axiom cones of
+\S\ref{sec:lean}), are available in the repository
+\texttt{papanokechi/pcf-continuant}
+(\url{https://github.com/papanokechi/pcf-continuant}).
+
+\paragraph{AI-assistance disclosure.}
+Prepared with AI assistance (GitHub Copilot; Anthropic Claude) for drafting,
+computer-algebra verification, and manuscript preparation. All Lean axiom cones
+were obtained by compiling against the pinned toolchain
+(\texttt{lake-manifest.json}); the numerical witnesses were run under
+\texttt{mpmath} at $50$-digit precision. The author takes responsibility for the
+content and for the placement of each claim within the four-grade epistemic
+partition.
+
+\end{document}

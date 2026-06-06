@@ -1,0 +1,35 @@
+{
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "title": "When does the dominant coefficient of a polynomial continued fraction vanish? A monotone positivity criterion (machine-checked core), an unconditional bound for a positive family, and an explicit vanishing witness",
+  "version": "0.1.0-draft",
+  "language": "eng",
+  "license": "CC-BY-4.0",
+  "creators": [
+    {
+      "name": "Papanokechi",
+      "orcid": "0009-0000-6192-8273"
+    }
+  ],
+  "description": "<p>For a real polynomial <em>b</em> of degree <em>d</em> with leading coefficient <em>&beta;<sub>d</sub>&gt;0</em>, let <em>q<sub>n</sub></em> be the continuant denominators with <em>q<sub>0</sub>=1, q<sub>1</sub>=b(1), q<sub>n</sub>=b(n)q<sub>n-1</sub>+q<sub>n-2</sub></em>. With <em>P<sub>n</sub>=&prod;<sub>k&le;n</sub>b(k)</em> and <em>Q<sub>n</sub>=q<sub>n</sub>/P<sub>n</sub></em>, the scaled limit <em>C=R<sub>&infin;</sub>=lim Q<sub>n</sub></em> is the dominant (connection) coefficient of the seed (1,b(1)); <em>C&ne;0</em> iff <em>q</em> is not minimal.</p><p><strong>Results.</strong> (1) A <strong>ratio criterion</strong>: once <em>b&gt;0</em> on a tail and two consecutive <em>q</em> are positive, <em>q<sub>n</sub>/q<sub>n-1</sub>&gt;b(n)&rarr;+&infin;</em>, so <em>q</em> is dominant and <em>C&ne;0</em> (elementary). (2) A <strong>positivity-persistence lemma</strong>: if <em>u<sub>n</sub>=1/(b(n-1)b(n))&gt;0</em> from some index and the scaled sequence is then positive, <em>Q<sub>n</sub></em> is nondecreasing and <em>C&ge;Q<sub>N0</sub>&gt;0</em>; the monotone&ndash;bounded core is verified in Lean 4 (Mathlib) with a clean axiom cone (no sorryAx). <strong>Corollary:</strong> <em>b(n)&gt;0</em> for all <em>n&ge;1</em> forces <em>C&ge;1</em>; in particular the family <em>b(n)=An<sup>2</sup>+Bn+C<sub>0</sub></em>, integers <em>A,B,C<sub>0</sub>&ge;1</em>, has <em>C&ge;1</em> unconditionally, recovering the strict positivity <em>&delta;=log R<sub>&infin;</sub>&gt;0</em> of the companion quadratic growth-law deposit. (3) <strong>Sharpness (falsification-first):</strong> the universal claim &ldquo;<em>C&ne;0</em> for every <em>&beta;<sub>d</sub>&gt;0</em>&rdquo; is <strong>FALSE</strong> &mdash; an explicit quadratic <em>b(n)=n<sup>2</sup>&minus;6.2803109563277&hellip;n+8.4205764270426&hellip;</em> has <em>C=0</em> to more than forty digits at 50-digit precision, with dominant scale <em>&prod;|b|&gt;10<sup>43000</sup></em> at the same index (a genuine minimal seed). The vanishing is produced by the sign-varying transient (<em>b(2),b(3)&lt;0</em>), not the tail; <em>b(1)&gt;0</em> does not imply <em>C&ne;0</em>. Only <em>&ge;1</em> zero is claimed: <em>(&alpha;,&beta;)&mapsto;R<sub>&infin;</sub></em> has genuine poles wherever <em>b</em> has an integer root, so a sign-change count is not a zero count; the witness sits in a verified pole-free bracket with a single monotone crossing.</p><p><strong>Epistemic status (SIARC four-class).</strong> <strong>PROVEN</strong> &mdash; the monotone/bounded-below engine and the Casoratian identity are machine-checked in Lean 4 (cones &sube; {propext, Classical.choice, Quot.sound}, no sorryAx). <strong>STRUCTURAL</strong> &mdash; the ratio criterion and the shifted (N0&gt;1) form of the lemma are complete elementary hand proofs, not yet formalized; the all-positive C&ge;1 bound is the Lean engine plus a one-line reduction. <strong>VERIFIED</strong> &mdash; the vanishing witness and the no-seed-index-leak check are mpmath at 50 digits, reported above the floor. <strong>FALSE</strong> &mdash; the universal C&ne;0 claim, disproved by the witness. <strong>Open:</strong> whether C=0 implies the associated generating function is <em>entire</em> requires a separate unique-nearest-singularity analysis (stated, not claimed); literature locators (Perron, Pincherle, Frobenius radius bound) are flagged unverified and no result depends on them.</p>",
+  "keywords": [
+    "polynomial continued fractions",
+    "convergent denominators",
+    "minimal and dominant solutions",
+    "connection coefficient",
+    "Casoratian",
+    "formal verification",
+    "Lean 4",
+    "irrationality",
+    "SIARC"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "10.5281/zenodo.20564681",
+      "scheme": "doi",
+      "resource_type": "publication-preprint"
+    }
+  ],
+  "notes": "DRAFT METADATA - NOT YET DEPOSITED. Prepared for operator review only; no Zenodo record minted, no GitHub release, no webhook. ORCID 0009-0000-6192-8273 is source-verified. The isSupplementTo target 10.5281/zenodo.20564681 is the concept (cite-all) DOI of the companion quadratic growth-law paper (pcf-quadratic-growth), whose strict positivity delta=log R_inf>0 for A,B,C0>=1 is the all-positive corollary of this work; verify the target DOI is live before any deposit. Deposit unit (intended): Cnonzero_classification.pdf (the paper) + the numerical witnesses (review_check_Cnonzero.py, review_check_transient.py, falsify_Czero.py, locate_Czero.py, verify_witness_precision.py, check_bracket_continuity.py, check_seed_index.py) + the Lean core project lean/pcf_continuant (Apache-2.0; lake-manifest.json pins Mathlib). License CC-BY-4.0 for the paper per project convention (CC-BY-4.0 papers, Apache-2.0 code). OPEN/FLAGGED before deposit: (1) STEP-0 unique-nearest-singularity analysis is NOT done - the 'entire' reading of C=0 is explicitly withheld; (2) citation locators Perron / Pincherle / Birkhoff-Trjitzinsky / Wong-Li / Frobenius radius bound are source-UNVERIFIED and carry FLAG(operator) in the manuscript; no result depends on them. ALL irreversible actions (repo creation, push, tag, webhook, Zenodo publish) remain operator-gated."
+}

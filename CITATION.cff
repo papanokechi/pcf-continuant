@@ -1,0 +1,54 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it using the metadata below."
+type: software
+title: "pcf-continuant: when does the dominant coefficient of a polynomial continued fraction vanish? (positivity criterion with a machine-checked core; explicit vanishing witness)"
+abstract: >-
+  For a real polynomial b of degree d with leading coefficient beta_d > 0, let q_n
+  be the continuant denominators q_0 = 1, q_1 = b(1), q_n = b(n) q_{n-1} + q_{n-2}.
+  With P_n = prod_{k<=n} b(k) and Q_n = q_n / P_n, the scaled limit
+  C = R_inf = lim Q_n is the dominant connection coefficient of the seed (1, b(1)),
+  and C != 0 iff q is not a minimal solution. A ratio criterion and a
+  positivity-persistence lemma give: once b > 0 on a tail with two consecutive
+  positive q, q is dominant and C != 0; and if b(n) > 0 for all n >= 1 then
+  C >= 1 (the monotone, bounded-below engine is machine-checked in Lean 4 with a
+  clean axiom cone, no sorryAx). This recovers the strict positivity
+  delta = log R_inf > 0 of the companion quadratic growth-law deposit for the
+  family A n^2 + B n + C_0 with integers A, B, C_0 >= 1. The universal statement
+  "C != 0 for all beta_d > 0" is FALSE: an explicit quadratic
+  b(n) = n^2 - 6.2803109563277...n + 8.4205764270426... has C = 0 to more than
+  40 digits at 50-digit precision (sign-varying transient; b(1) > 0 does not imply
+  C != 0). Only >= 1 zero is claimed: (alpha,beta) -> R_inf has genuine poles where
+  b has an integer root, so sign changes are not zeros. Grades: PROVEN
+  (Lean core), STRUCTURAL (elementary criteria), VERIFIED (witness, mpmath 50 digits),
+  FALSE (universal claim). Whether C = 0 implies the generating function is entire is
+  left open (separate unique-nearest-singularity analysis).
+authors:
+  # ORCID source-verified from the ORCID registry page.
+  - family-names: "Papanokechi"
+    orcid: "https://orcid.org/0009-0000-6192-8273"
+version: "0.1.0-draft"
+date-released: "2026-06-06"
+license: CC-BY-4.0
+repository-code: "https://github.com/papanokechi/pcf-continuant"
+keywords:
+  - "polynomial continued fractions"
+  - "convergent denominators"
+  - "minimal and dominant solutions"
+  - "connection coefficient"
+  - "Casoratian"
+  - "Lean 4"
+  - "formal verification"
+  - "SIARC"
+references:
+  # Companion quadratic growth-law paper: this work's all-positive corollary (C >= 1)
+  # is exactly its strict positivity delta = log R_inf > 0. DOI = its concept
+  # (cite-all) DOI; confirm live before deposit.
+  - type: article
+    title: "An exact growth constant for the quadratic polynomial continued fraction (structural proof; numerically verified)"
+    authors:
+      - family-names: "Papanokechi"
+    doi: "10.5281/zenodo.20564681"
+    notes: "Companion deposit (pcf-quadratic-growth); its delta = log R_inf > 0 is the all-positive corollary here. FLAG(operator): confirm DOI live before deposit."
+    year: 2026
+# DRAFT - NOT YET DEPOSITED. No Zenodo record, no GitHub release, no webhook.
+# All irreversible actions (repo, push, tag, publish) remain operator-gated.
